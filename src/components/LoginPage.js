@@ -1,19 +1,24 @@
 import { LockClosedIcon } from '@heroicons/react/solid';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useAuth } from '@hooks/useAuth';
 
 export default function LoginPage() {
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
   const auth = useAuth();
+  const [loginSuccess, setLoginSuccess] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const email = emailRef.current.value;
     const password = passwordRef.current.value;
     
-    auth.signIn(email, password).then(() => {
-      console.log('Login success')
+    auth.signIn(email, password).then((response) => {
+      if (response.access_token) {
+        setLoginSuccess(200);
+      }
+    }).catch((error) => {
+      setLoginSuccess(error.response.status);
     });
   };
 
@@ -26,6 +31,16 @@ export default function LoginPage() {
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Sign in to your account</h2>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {loginSuccess === 401 && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="block sm:inline">Email or password is incorrect.</strong>
+              </div>
+            )}
+            {loginSuccess === 200 && (
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="block sm:inline">Login success.</strong>
+              </div>
+            )}
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
